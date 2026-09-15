@@ -42,7 +42,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/proton-saga-maintenance-app/',
+  base: './',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
