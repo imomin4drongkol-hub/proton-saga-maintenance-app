@@ -22,6 +22,7 @@ import CostAnalytics from '@/components/CostAnalytics';
 import CPKCard from '@/components/CPKCard';
 import EfficiencyCard from '@/components/EfficiencyCard';
 import EfficiencyChart from '@/components/EfficiencyChart';
+import RefuelPatternCard from '@/components/RefuelPatternCard';
 
 type Tab = 'dashboard' | 'service' | 'fuel';
 
@@ -165,6 +166,7 @@ function AppContent() {
                   fuelRecords={fuelRecords}
                 />
                 <EfficiencyCard records={fuelRecords} />
+                <RefuelPatternCard records={fuelRecords} />
                 <div>
                   <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">
                     Ringkasan Servis
@@ -215,7 +217,7 @@ function AppContent() {
                 </div>
                 <FuelStats records={fuelRecords} />
                 <EfficiencyChart records={fuelRecords} />
-                <FuelForm onSaved={fetchFuelRecords} />
+                <FuelForm onSaved={fetchFuelRecords} fuelRecords={fuelRecords} />
                 <FuelTable
                   records={fuelRecords}
                   loading={loadingFuel}

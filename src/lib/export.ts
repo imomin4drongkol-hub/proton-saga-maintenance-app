@@ -40,6 +40,10 @@ export function exportFuelCSV(records: FuelRecord[]) {
     'Tarikh Isi',
     'Jenis Petrol',
     'Mileage (km)',
+    'Baki Bar (0-7)',
+    'Range Dashboard (km)',
+    'Anggaran Baki Liter',
+    'Anggaran Baki Range (km)',
     'Liter',
     'Harga/Liter (RM)',
     'Jumlah Kos (RM)',
@@ -51,6 +55,10 @@ export function exportFuelCSV(records: FuelRecord[]) {
     r.fill_date,
     r.fuel_type,
     r.mileage_km,
+    r.fuel_bar_before ?? '',
+    r.dashboard_range_km ?? '',
+    r.est_remaining_liters !== null ? Number(r.est_remaining_liters).toFixed(3) : '',
+    r.est_remaining_range_km ?? '',
     r.liters.toFixed(3),
     r.price_per_liter_rm.toFixed(2),
     r.total_cost_rm.toFixed(2),
@@ -124,6 +132,8 @@ export function exportFuelPDF(records: FuelRecord[]) {
         <td>${r.fill_date}</td>
         <td>${r.fuel_type}</td>
         <td style="text-align:right">${r.mileage_km.toLocaleString('ms-MY')}</td>
+        <td style="text-align:center">${r.fuel_bar_before !== null ? `${r.fuel_bar_before}/7` : '—'}</td>
+        <td style="text-align:right">${r.dashboard_range_km !== null ? r.dashboard_range_km : (r.est_remaining_range_km !== null ? `~${r.est_remaining_range_km}` : '—')}</td>
         <td style="text-align:right">${distanceKm !== null ? distanceKm.toLocaleString('ms-MY') : '—'}</td>
         <td style="text-align:right">${Number(r.liters).toFixed(3)}</td>
         <td style="text-align:right">RM ${Number(r.price_per_liter_rm).toFixed(2)}</td>
@@ -153,7 +163,7 @@ export function exportFuelPDF(records: FuelRecord[]) {
     <h1>Log Petrol — Proton Saga VVT MC2</h1>
     <div class="sub">Dijana pada ${new Date().toLocaleDateString('ms-MY', { day: '2-digit', month: 'long', year: 'numeric' })} · ${records.length} rekod</div>
     <table><thead><tr>
-      <th>Tarikh</th><th>Petrol</th><th>Mileage</th><th>Jarak (km)</th><th>Liter</th><th>H/L (RM)</th><th>Kos (RM)</th><th>km/L</th><th>RM/km</th>
+      <th>Tarikh</th><th>Petrol</th><th>Mileage</th><th>Baki Bar</th><th>Range (km)</th><th>Jarak (km)</th><th>Liter</th><th>H/L (RM)</th><th>Kos (RM)</th><th>km/L</th><th>RM/km</th>
     </tr></thead><tbody>${rows}</tbody></table>
     <div class="total">Jumlah Kos: RM ${totalCost.toFixed(2)} · Total Liter: ${totalLiters.toFixed(3)} L</div>
     <div class="footer">Log Petrol Proton Saga VVT MC2</div>

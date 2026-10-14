@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Trash2, Search, Pencil, Check, X, Loader2, Fuel } from 'lucide-react';
+import { Trash2, Search, Pencil, Check, X, Loader2, Fuel, AlertTriangle } from 'lucide-react';
 import { supabase, type FuelRecord } from '@/lib/supabase';
 import ReceiptThumbnail from '@/components/ReceiptThumbnail';
+import FuelGauge from '@/components/FuelGauge';
+import { isLowFuel, getEffectiveRange, getDefaultLowFuelWarning } from '@/lib/fuel-calc';
+import { useVehicle } from '@/components/VehicleContext';
 
 interface FuelTableProps {
   records: FuelRecord[];
@@ -46,6 +49,8 @@ function computeStats(records: FuelRecord[]): DisplayRow[] {
 }
 
 export default function FuelTable({ records, loading, onChanged }: FuelTableProps) {
+  const { activeVehicle } = useVehicle();
+  const lowFuelThreshold = getDefaultLowFuelWarning(activeVehicle);
   const [search, setSearch] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -163,6 +168,7 @@ export default function FuelTable({ records, loading, onChanged }: FuelTableProp
               <th className="px-6 py-3 font-semibold">Tarikh</th>
               <th className="px-6 py-3 font-semibold">Petrol</th>
               <th className="px-6 py-3 text-right font-semibold">Mileage</th>
+              <th className="px-6 py-3 font-semibold">Baki Sebelum Isi</th>
               <th className="px-6 py-3 text-right font-semibold">Jarak (km)</th>
               <th className="px-6 py-3 text-right font-semibold">Liter</th>
               <th className="px-6 py-3 text-right font-semibold">Kos (RM)</th>
@@ -176,7 +182,7 @@ export default function FuelTable({ records, loading, onChanged }: FuelTableProp
           <tbody className="divide-y divide-slate-100">
             {loading && (
               <tr>
-                <td colSpan={11} className="px-6 py-16 text-center">
+                <td colSpan={12} className="px-6 py-16 text-center">
                   <Loader2 className="mx-auto h-6 w-6 animate-spin text-slate-400" />
                   <p className="mt-2 text-sm text-slate-400">Memuatkan rekod...</p>
                 </td>
@@ -185,7 +191,7 @@ export default function FuelTable({ records, loading, onChanged }: FuelTableProp
 
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-6 py-16 text-center">
+                <td colSpan={12} className="px-6 py-16 text-center">
                   <Fuel className="mx-auto h-8 w-8 text-slate-300" />
                   <p className="mt-3 text-sm font-medium text-slate-600">
                     {search
@@ -204,6 +210,9 @@ export default function FuelTable({ records, loading, onChanged }: FuelTableProp
             {!loading &&
               filtered.map((record) => {
                 const isEditing = editingId === record.id;
+                const lowFuel = isLowFuel(record, lowFuelThreshold);
+                const { range, isEstimated } = getEffectiveRange(record);
+                const hasFuelData = record.fuel_bar_before !== null || range !== null;
                 return (
                   <tr key={record.id} className="transition hover:bg-slate-50/60">
                     {/* Tarikh */}
@@ -265,6 +274,43 @@ export default function FuelTable({ records, loading, onChanged }: FuelTableProp
                         />
                       ) : (
                         record.mileage_km.toLocaleString('ms-MY')
+                      )}
+                    </td>
+
+                    {/* Baki Sebelum Isi */}
+                    <td className="px-6 py-4">
+                      {hasFuelData ? (
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center gap-2">
+                            {record.fuel_bar_before !== null && (
+                              <span className="text-xs font-medium text-slate-600">
+                                {record.fuel_bar_before}/7
+                              </span>
+                            )}
+                            {lowFuel && (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-700 ring-1 ring-red-200">
+                                <AlertTriangle className="h-2.5 w-2.5" />
+                                Rendah
+                              </span>
+                            )}
+                          </div>
+                          {record.fuel_bar_before !== null && (
+                            <div className="w-28">
+                              <FuelGauge
+                                value={record.fuel_bar_before}
+                                size="sm"
+                                showLabels={false}
+                              />
+                            </div>
+                          )}
+                          {range !== null && (
+                            <span className={`text-xs tabular-nums ${isEstimated ? 'text-slate-400' : 'text-slate-600'}`}>
+                              {isEstimated ? '~' : ''}{range} km
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-300">—</span>
                       )}
                     </td>
 

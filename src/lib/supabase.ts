@@ -10,6 +10,8 @@ export interface Vehicle {
   name: string;
   model: string;
   initial_odometer_km: number;
+  tank_capacity_l: number;
+  low_fuel_warning_km: number;
   created_at: string;
 }
 
@@ -42,6 +44,10 @@ export interface FuelRecord {
   full_tank: boolean;
   notes: string | null;
   receipt_url: string | null;
+  fuel_bar_before: number | null;
+  dashboard_range_km: number | null;
+  est_remaining_liters: number | null;
+  est_remaining_range_km: number | null;
   created_at: string;
 }
 

@@ -34,6 +34,8 @@ export default function Header() {
         name: form.name.trim(),
         model: form.model.trim(),
         initial_odometer_km: form.initial_odometer_km,
+        tank_capacity_l: 40,
+        low_fuel_warning_km: 80,
       });
       showToast('Kenderaan berjaya ditambah.', 'success');
       setForm({ name: '', model: '', initial_odometer_km: 0 });
